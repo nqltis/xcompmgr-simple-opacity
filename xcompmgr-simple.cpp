@@ -176,6 +176,59 @@ XserverRegion get_border_size(Client *client) {
     return border;
 }
 
+/* Get the opacity prop from window
+         not found: default
+         otherwise the value
+ */
+static unsigned int get_opacity_prop(Display *dpy, Client *client, unsigned int def) {
+  Atom actual;
+  int format;
+  unsigned long n, left;
+
+  unsigned char *data;
+  int result =
+      XGetWindowProperty(dpy, client->window, opacity_atom, 0L, 1L, false, XA_CARDINAL,
+                         &actual, &format, &n, &left, &data);
+  if (result == Success && data != NULL) {
+    unsigned int i;
+    memcpy(&i, data, sizeof(unsigned int));
+    XFree((void *)data);
+    return i;
+  }
+  return def;
+}
+
+static Picture solid_picture(Display *display, Bool argb, double a, double r,
+                             double g, double b) {
+  Pixmap pixmap;
+  Picture picture;
+  XRenderPictureAttributes pa;
+  XRenderColor c;
+
+  pixmap = XCreatePixmap(display, root_window, 1, 1, argb ? 32 : 8);
+  if (!pixmap)
+    return 0;
+
+  pa.repeat = true;
+  picture =
+      XRenderCreatePicture(display, pixmap,
+                           XRenderFindStandardFormat(
+                               display, argb ? PictStandardARGB32 : PictStandardA8),
+                           CPRepeat, &pa);
+  if (!picture) {
+    XFreePixmap(display, pixmap);
+    return 0;
+  }
+
+  c.alpha = a * 0xffff;
+  c.red = r * 0xffff;
+  c.green = g * 0xffff;
+  c.blue = b * 0xffff;
+  XRenderFillRectangle(display, PictOpSrc, picture, &c, 0, 0, 1, 1);
+  XFreePixmap(display, pixmap);
+  return picture;
+}
+
 void paint_all(XserverRegion region) {
     if (!region) {
         XRectangle r;
