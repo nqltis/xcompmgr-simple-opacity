@@ -57,6 +57,7 @@ public:
     Picture alpha_pict;
     XserverRegion border_size;
     XserverRegion extents;
+    unsigned int opacity;
     bool shaped;
     XRectangle shape_bounds;
 
@@ -491,6 +492,7 @@ void add_client(Window window) {
     client->alpha_pict = 0;
     client->border_size = 0;
     client->extents = 0;
+    client->opacity = OPAQUE;
 
     client->border_clip = 0;
 
