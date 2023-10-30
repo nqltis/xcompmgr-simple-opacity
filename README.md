@@ -1,26 +1,18 @@
-# xcompmgr-simple
+# xcompmgr-simple-opacity
 An extremely small and fast xorg windows compositor that adds transparency to your desktop environment
 
-## Purpose
-As of the time of writing this, there exists no adequate project that serves the purpose of being an example of doing very basic windows compositing correctly. The closest thing we have is xcompmgr, but the code has many problems if it wants to be that. For instace,
-* "c-isms"
-    * meaningless and way too short variable names
-    * terrible formatting
-    * variables being declared at the top of the function instead of when used
-* does much more than it should
-    * shadows
-    * fading on window closing
-* and generally a high signal to noise ratio which makes it hard to understand
+This is a fork of [jmanc3's xcompmgr-simple](https://github.com/jmanc3/xcompmgr-simple) whose purpose is to simplify [xorg's xcompgmr](https://gitlab.freedesktop.org/xorg/app/xcompmgr) code base to only implement window transparency using ARGB. That code however removed the support for global transparency using window parameter _NET_WM_WINDOW_OPACITY (eg. using transset). This code implements it back by using the necessary functions from xorg's implementation.
 
-So I used xcompmgr as a base and ripped out all the code that was not essential to drawing windows with transparency and ended it up with 800~ lines of c++ code, while xcompmgr is 2000~ lines of badly written c code
+## Disclaimer
+I am not experienced at all with X11's API and the X Window System protocol, this was just for me the occasion to discover and modify some code.
 
-I hope this project will help you in your ventures to write a windows compositor or even a windows manager that has a compositor (which is the reason I needed this to exist)
+Consider this code unreliable.
 
 ## Dependencies
 * cmake
 * a c++ compiler
 * xorg development headers
-* xorg extension headers
+* xorg extension headers (Xrender, Xcomposite, XDamage, Xext)
 
 ## Building with cmake
 At the root of the project
@@ -30,3 +22,6 @@ cd out
 cmake ../
 make 
 ```
+
+## Copyright
+The copyright notice can be found in xcompmgr.cpp file
