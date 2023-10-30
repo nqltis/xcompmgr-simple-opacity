@@ -39,6 +39,8 @@
 #include <X11/extensions/Xrender.h>
 #include <X11/extensions/shape.h>
 
+#define OPAQUE 0xffffffff
+
 enum Window_Opaqueness {
     SOLID = 0,
     TRANSPARENT = 1,
@@ -443,6 +445,8 @@ void determine_opaqueness(Client *client) {
     Window_Opaqueness opaqueness;
     if (format && format->type == PictTypeDirect && format->direct.alphaMask) {
         opaqueness = Window_Opaqueness::ARGB;
+    } else if (client->opacity != OPAQUE) {
+        opaqueness = Window_Opaqueness::TRANSPARENT;
     } else {
         opaqueness = Window_Opaqueness::SOLID;
     }
@@ -461,6 +465,12 @@ void map_win(Window window) {
     if (!client) return;
 
     client->attr.map_state = IsViewable;
+
+    /* This needs to be here or else we lose transparency messages */
+    XSelectInput(display, client->window, PropertyChangeMask);
+
+    /* This needs to be here since we don't get PropertyNotify when unmapped */
+    client->opacity = get_opacity_prop(display, client, OPAQUE);
 
     determine_opaqueness(client);
     client->damaged = 0;
@@ -889,6 +899,7 @@ int main(int argc, char **argv) {
                         /* reset opaqueness and redraw window */
                         Client *client = get_client_from_window(ev.xproperty.window);
                         if (client) {
+                            client->opacity = get_opacity_prop(display, client, OPAQUE);
                             determine_opaqueness(client);
                         }
                     }
