@@ -334,6 +334,9 @@ void paint_all(XserverRegion region) {
         Client *w = clients[i];
         XFixesSetPictureClipRegion(display, root_buffer, 0, 0, w->border_clip);
 
+        if (w->opacity != OPAQUE && !w->alpha_pict)
+            w->alpha_pict =
+                solid_picture(display, false, (double)w->opacity / OPAQUE, 0, 0, 0);
         if (w->opaqueness == Window_Opaqueness::TRANSPARENT) {
             int x, y, wid, hei;
             XFixesIntersectRegion(display, w->border_clip, w->border_clip, w->border_size);
